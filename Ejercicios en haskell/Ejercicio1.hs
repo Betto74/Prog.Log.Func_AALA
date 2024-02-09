@@ -1,18 +1,19 @@
-import qualified Data.Map as Map
+aplicarDescuento :: Float -> Float -> Float
+aplicarDescuento precio descuento = precio - (precio * descuento / 100)
 
-applyDiscount :: Double -> Double -> Double
-applyDiscount price discount = price - price * discount / 100
+aplicarIVA :: Float -> Float -> Float
+aplicarIVA precio iva = precio + (precio * iva / 100)
 
-applyIVA :: Double -> Double -> Double
-applyIVA price percentage = price + price * percentage / 100
 
-priceBasket :: Map.Map Double Double -> (Double -> Double -> Double) -> Double
-priceBasket basket function = Map.foldlWithKey' (\acc price discount -> acc + function price discount) 0 basket
+precioFinalCesta :: [(Float, Float)] -> (Float -> Float -> Float) -> Float
+precioFinalCesta [] _ = 0
+precioFinalCesta ((precio, porcentaje):resto) funcion =
+    funcion precio porcentaje + precioFinalCesta resto funcion
 
 main :: IO ()
 main = do
-  let basket = Map.fromList [(1000, 20), (500, 10), (100, 1)]
-  putStrLn $ "El precio de la compra tras aplicar los descuentos es: " ++ show (priceBasket basket applyDiscount)
-  putStrLn $ "El precio de la compra tras aplicar el IVA es: " ++ show (priceBasket basket applyIVA)
-
-
+    let cesta = [(100, 10), (50, 5), (30, 0)]
+    let precioFinalConDescuento = precioFinalCesta cesta aplicarDescuento
+    let precioFinalConIVA = precioFinalCesta cesta aplicarIVA
+    putStrLn $ "Precio final con descuento: " ++ show precioFinalConDescuento
+    putStrLn $ "Precio final con IVA: " ++ show precioFinalConIVA
